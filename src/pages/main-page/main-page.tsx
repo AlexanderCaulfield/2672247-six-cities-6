@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import CitiesList from '../../components/cities-list/cities-list';
@@ -7,42 +7,45 @@ import OffersList from '../../components/offers-list/offers-list';
 import SortingOptions from '../../components/sorting-options/sorting-options';
 import Spinner from '../../components/spinner/spinner';
 import { AuthorizationStatus, CITIES, DEFAULT_CITY, SortType } from '../../const';
-import { AppDispatch, RootState } from '../../store';
-import { changeCity } from '../../store/action';
-import { Offer } from '../../types/offer';
-
-const sortOffers = (offers: Offer[], sortType: SortType): Offer[] => {
-  switch (sortType) {
-    case 'Price: low to high':
-      return [...offers].sort((first, second) => first.price - second.price);
-    case 'Price: high to low':
-      return [...offers].sort((first, second) => second.price - first.price);
-    case 'Top rated first':
-      return [...offers].sort((first, second) => second.rating - first.rating);
-    default:
-      return offers;
-  }
-};
+import { AppDispatch } from '../../store';
+import { changeCity } from '../../store/slices/app-slice';
+import {
+  selectAuthorizationStatus,
+  selectCity,
+  selectOffersByCity,
+  selectOffersLoading,
+  selectSortedOffers,
+} from '../../store/selectors';
 
 function MainPage(): JSX.Element {
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
   const [activeSort, setActiveSort] = useState<SortType>('Popular');
   const dispatch = useDispatch<AppDispatch>();
-  const city = useSelector((state: RootState) => state.city);
-  const offers = useSelector((state: RootState) => state.offers);
-  const isOffersLoading = useSelector((state: RootState) => state.isOffersLoading);
-  const authorizationStatus = useSelector((state: RootState) => state.authorizationStatus);
-  const selectedCity = CITIES.find((item) => item.name === city) ?? DEFAULT_CITY;
-  const offersInCity = offers.filter((offer) => offer.city === selectedCity.name);
-  const sortedOffers = sortOffers(offersInCity, activeSort);
+  const city = useSelector(selectCity);
+  const isOffersLoading = useSelector(selectOffersLoading);
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
+  const offersInCity = useSelector(selectOffersByCity);
+  const sortedOffers = useSelector((state) => selectSortedOffers(state, activeSort));
+
+  const selectedCity = useMemo(
+    () => CITIES.find((item) => item.name === city) ?? DEFAULT_CITY,
+    [city]
+  );
 
   useEffect(() => {
     setActiveOfferId(null);
   }, [city]);
 
-  const handleCityClick = (cityName: string) => {
-    dispatch(changeCity(cityName));
-  };
+  const handleCityClick = useCallback(
+    (cityName: string) => {
+      dispatch(changeCity(cityName));
+    },
+    [dispatch]
+  );
+
+  const handleSortChange = useCallback((sortType: SortType) => {
+    setActiveSort(sortType);
+  }, []);
 
   return (
     <div className="page page--gray page--main">
@@ -103,7 +106,7 @@ function MainPage(): JSX.Element {
               <b className="places__found">
                 {offersInCity.length} places to stay in {selectedCity.name}
               </b>
-              <SortingOptions activeSort={activeSort} onSortChange={setActiveSort} />
+              <SortingOptions activeSort={activeSort} onSortChange={handleSortChange} />
               {isOffersLoading ? (
                 <Spinner />
               ) : (

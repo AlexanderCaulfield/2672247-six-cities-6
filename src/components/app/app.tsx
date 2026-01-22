@@ -7,13 +7,13 @@ import MainPage from '../../pages/main-page/main-page';
 import NotFoundPage from '../../pages/not-found-page/not-found-page';
 import OfferPage from '../../pages/offer-page/offer-page';
 import { checkAuth, fetchOffers } from '../../store/api-actions';
-import { AppDispatch, RootState } from '../../store';
+import { AppDispatch } from '../../store';
+import { selectFavoriteOffers } from '../../store/selectors';
 import PrivateRoute from '../private-route/private-route';
 
 function App(): JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
-  const offers = useSelector((state: RootState) => state.offers);
-  const favoriteOffers = offers.filter((offer) => offer.isFavorite);
+  const favoriteOffers = useSelector(selectFavoriteOffers);
 
   useEffect(() => {
     dispatch(fetchOffers());

@@ -1,15 +1,15 @@
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AuthorizationStatus } from '../../const';
-import { RootState } from '../../store';
 import Spinner from '../spinner/spinner';
+import { selectAuthorizationStatus } from '../../store/selectors';
 
 type PrivateRouteProps = {
   children: JSX.Element;
 };
 
 function PrivateRoute({ children }: PrivateRouteProps): JSX.Element {
-  const authorizationStatus = useSelector((state: RootState) => state.authorizationStatus);
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
 
   if (authorizationStatus === AuthorizationStatus.Unknown) {
     return <Spinner />;

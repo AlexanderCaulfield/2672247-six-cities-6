@@ -4,7 +4,7 @@ import { AuthorizationStatus } from '../const';
 import { saveToken } from '../services/token';
 import { Offer } from '../types/offer';
 import { Review } from '../types/review';
-import { setAuthorizationStatus } from './action';
+import { setAuthorizationStatus } from './slices/user-slice';
 
 type OfferServer = {
   id: string;

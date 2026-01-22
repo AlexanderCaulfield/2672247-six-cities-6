@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Map from '../../components/map/map';
@@ -8,7 +8,16 @@ import ReviewsList from '../../components/reviews-list/reviews-list';
 import Spinner from '../../components/spinner/spinner';
 import { AuthorizationStatus, CITIES, DEFAULT_CITY } from '../../const';
 import { fetchComments, fetchNearbyOffers, fetchOffer, postComment } from '../../store/api-actions';
-import { AppDispatch, RootState } from '../../store';
+import { AppDispatch } from '../../store';
+import {
+  selectAuthorizationStatus,
+  selectComments,
+  selectIsCommentSubmitting,
+  selectIsOfferLoading,
+  selectIsOfferNotFound,
+  selectNearbyOffers,
+  selectOffer,
+} from '../../store/selectors';
 import NotFoundPage from '../not-found-page/not-found-page';
 
 const ratingToPercent = (rating: number): string => `${Math.round(rating) * 20}%`;
@@ -16,13 +25,13 @@ const ratingToPercent = (rating: number): string => `${Math.round(rating) * 20}%
 function OfferPage(): JSX.Element {
   const { id } = useParams();
   const dispatch = useDispatch<AppDispatch>();
-  const offer = useSelector((state: RootState) => state.offer);
-  const nearbyOffers = useSelector((state: RootState) => state.nearbyOffers);
-  const comments = useSelector((state: RootState) => state.comments);
-  const isOfferLoading = useSelector((state: RootState) => state.isOfferLoading);
-  const isCommentSubmitting = useSelector((state: RootState) => state.isCommentSubmitting);
-  const isOfferNotFound = useSelector((state: RootState) => state.isOfferNotFound);
-  const authorizationStatus = useSelector((state: RootState) => state.authorizationStatus);
+  const offer = useSelector(selectOffer);
+  const nearbyOffers = useSelector(selectNearbyOffers);
+  const comments = useSelector(selectComments);
+  const isOfferLoading = useSelector(selectIsOfferLoading);
+  const isCommentSubmitting = useSelector(selectIsCommentSubmitting);
+  const isOfferNotFound = useSelector(selectIsOfferNotFound);
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
 
   useEffect(() => {
     if (id) {
@@ -40,7 +49,11 @@ function OfferPage(): JSX.Element {
     return <Spinner />;
   }
 
-  const city = CITIES.find((item) => item.name === offer.city) ?? DEFAULT_CITY;
+  const city = useMemo(
+    () => CITIES.find((item) => item.name === offer.city) ?? DEFAULT_CITY,
+    [offer.city]
+  );
+
   const avatarClassName = `offer__avatar-wrapper${offer.host.isPro ? ' offer__avatar-wrapper--pro' : ''} user__avatar-wrapper`;
 
   const handleCommentSubmit = (comment: string, rating: number) => {
