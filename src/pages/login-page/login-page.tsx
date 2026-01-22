@@ -3,13 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { AuthorizationStatus } from '../../const';
 import { login } from '../../store/api-actions';
-import { AppDispatch, RootState } from '../../store';
+import { AppDispatch } from '../../store';
+import { selectAuthorizationStatus } from '../../store/selectors';
 
 function LoginPage(): JSX.Element {
   const [formState, setFormState] = useState({ email: '', password: '' });
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const authorizationStatus = useSelector((state: RootState) => state.authorizationStatus);
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
 
   useEffect(() => {
     if (authorizationStatus === AuthorizationStatus.Auth) {

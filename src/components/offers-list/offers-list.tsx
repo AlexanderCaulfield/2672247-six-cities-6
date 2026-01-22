@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import OfferCard from '../offer-card/offer-card';
 import { Offer } from '../../types/offer';
 
@@ -34,4 +35,4 @@ function OffersList({ offers, variant = 'cities', onActiveOfferChange }: OffersL
   );
 }
 
-export default OffersList;
+export default memo(OffersList);
